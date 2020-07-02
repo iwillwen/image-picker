@@ -4,5 +4,8 @@
      "fcHandler":"serverless.handler",
      "httpMethod":"ANY"
     }
-  ]
+  ],
+  "cicd": {
+    "package": "zip -r code.zip ./ -x '*.git*' -x '*.zip' -x '.DS_Store'"
+  }
 }
