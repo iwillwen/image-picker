@@ -1,11 +1,17 @@
 {
-  "fcRouteDefault" : [
-    {"apiUri":"/*",
-     "fcHandler":"serverless.handler",
-     "httpMethod":"ANY"
+  "fcRouteDefault": [
+    {
+      "apiUri": "/*",
+      "fcHandler": "serverless.handler",
+      "httpMethod": "ANY"
+    },
+    {
+      "apiUri": "/api/db_get",
+      "fcHandler": "/api/db_get.handler",
+      "httpMethod": "GET"
     }
   ],
   "cicd": {
-    "package": "zip -r code.zip ./ -x '*.git*' -x '*.zip' -x '.DS_Store'"
+    "package": "mkdir zip && rsync -a --exclude node_modules/ --exclude package-lock.json --exclude zip/ . ./zip && cd zip && npm install --production && zip -r ../code.zip ./ -x '*.git*' -x '*.zip' -x '.DS_Store' && cd ../ && rm -rf zip"
   }
 }
