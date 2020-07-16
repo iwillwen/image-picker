@@ -29,3 +29,14 @@ defalut.html      演示了通过 AJAX 方式读取 RDS 数据库数据
 /api/db_get.js    演示了如何读取 RDS 和 OTS 数据库
 package.json      演示了数据库操作需要安装的 npm 依赖
 ```
+- 要测试数据库效果，需要在「应用配置」中添加以下用于测试的环境变量，如果要开发自己的数据库应用，以下环境变量需要替换成自己的真实信息
+```
+OTS_ENDPOINT=https://todolist.cn-shanghai.ots.aliyuncs.com
+OTS_INSTANCE=todolist
+OTS_ACCESSKEY=LTAI4G1j3U8ue1yT3g6Tg1TG
+OTS_SECRET=WB8Ev6zMHoKQnUSLp8V4zP7xeAgbWC
+RDS_HOST=rm-uf6y14uhf0080yfrb7o.mysql.rds.aliyuncs.com
+RDS_DBNAME=faas-test
+RDS_USERNAME=faas_db_test
+RDS_PASSWORD=YY6i8Jp7W_mtYxU
+```
