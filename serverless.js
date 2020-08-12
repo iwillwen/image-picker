@@ -247,14 +247,13 @@ module.exports.handler = function(event, context, callback) {
           }
           
           if(fileExt){
-              var stop_download = false;
-              pathArray.forEach(function(v,i,a){
+              for(var v of pathArray){
+                console.info("安全检查:"+v,SAFE[v]);
                 if(SAFE[v]){
                   callback(null, htmlResponse);
-                  stop_download = true;
+                  return;
                 }
-              });
-              if(stop_download){return;}
+              }
               
               fnCall = function(){
                     fs.readFile(modulePath, (err, data) => {
