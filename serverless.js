@@ -1,5 +1,8 @@
-var fs = require("fs");
-
+const SAFE = {
+  '/api' : true,
+  '/.workbench':true,
+  '/serverless.js':true
+};
 const MIME = {
     "323"     : "text/h323",
     "acx"     : "application/internet-property-stream",
@@ -201,6 +204,7 @@ const MIME = {
     "xlsx"    : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "pptx"    : "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 };
+const fs = require("fs");
 module.exports.handler = function(event, context, callback) {
     try {
       var request = JSON.parse(event);
@@ -243,6 +247,14 @@ module.exports.handler = function(event, context, callback) {
           }
           
           if(fileExt){
+
+              pathArray.forEach(function(v,i,a){
+                if(SAFE[v]){
+                  callback(null, htmlResponse);
+                  return;
+                }
+              });
+
               fnCall = function(){
                     fs.readFile(modulePath, (err, data) => {
                         if (err) {
@@ -256,7 +268,7 @@ module.exports.handler = function(event, context, callback) {
                             headers: {
                                 "Content-type": MIME[fileExt]
                             },
-                            body: data.toString('base64')
+                            body: Buffer.from(data).toString("base64")
                         }
                         callback(null, fileResponse);
                         return;
