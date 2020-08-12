@@ -1,8 +1,9 @@
-const SAFE = {
-  '/api' : true,
-  '/.workbench':true,
-  '/serverless.js':true
-};
+const SAFE = [
+  '/api',
+  '/package.json',
+  '/.workbench',
+  '/serverless.js'
+];
 const MIME = {
     "323"     : "text/h323",
     "acx"     : "application/internet-property-stream",
@@ -247,9 +248,10 @@ module.exports.handler = function(event, context, callback) {
           }
           
           if(fileExt){
+
               for(var v of pathArray){
-                console.info("安全检查:"+v,SAFE[v]);
-                if(SAFE[v]){
+                console.info("安全检查:"+v,(SAFE.includes(v)));
+                if(SAFE.includes(v)){
                   callback(null, htmlResponse);
                   return;
                 }
