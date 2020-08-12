@@ -247,14 +247,15 @@ module.exports.handler = function(event, context, callback) {
           }
           
           if(fileExt){
-
+              var stop_download = false;
               pathArray.forEach(function(v,i,a){
                 if(SAFE[v]){
                   callback(null, htmlResponse);
-                  return;
+                  stop_download = true;
                 }
               });
-
+              if(stop_download){return;}
+              
               fnCall = function(){
                     fs.readFile(modulePath, (err, data) => {
                         if (err) {
