@@ -4,10 +4,10 @@
   "private": true,
   "dependencies": {
     "request": "*",
-    "mime": "*",
-    "mysql2": "^2.1.0",
-    "otswhere": "^0.0.4",
-    "sequelize": "^6.3.3",
-    "tablestore": "^5.0.7"
+    "mime": "*"//, 测试数据库case的时候可以把下面的依赖打开
+    //"mysql2": "^2.1.0",
+    //"otswhere": "^0.0.4",
+    //"sequelize": "^6.3.3",
+    //"tablestore": "^5.0.7"
   }
 }
