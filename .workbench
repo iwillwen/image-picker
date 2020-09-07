@@ -4,11 +4,6 @@
       "apiUri": "/*",
       "fcHandler": "serverless.handler",
       "httpMethod": "ANY"
-    },
-    {
-      "apiUri": "/api/db_get",
-      "fcHandler": "/api/db_get.handler",
-      "httpMethod": "GET"
     }
   ],
   "cicd": {
