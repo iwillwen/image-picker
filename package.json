@@ -1,8 +1,10 @@
 {
-  "name": "migration-ots-demo",
+  "name": "migration-demo",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "request": "*",
+    "mime": "*",
     "mysql2": "^2.1.0",
     "otswhere": "^0.0.4",
     "sequelize": "^6.3.3",
