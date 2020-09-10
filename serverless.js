@@ -1,18 +1,10 @@
-const FRAMEWORK = {
-    entry: null /* 指定框架入口文件的具体路径，如：'app/router.js'，如果是纯静态应用，指定为 null */
-};
-const SAFE = [
-    '/api', /* 保护文件避免被下载，避免通过访问 http(s)://域名/api/xxx.yyy 下载到源代码 */
-    '/package.json',
-    '/.workbench',
-    '/serverless.js'
-];
 const MIME = require('mime');
 const $request = require('request');
 const fs = require("fs");
 const path = require('path');
 const http = require('http');
 const os = require('os');
+const serverlessConfig = require('./serverless_config');
 let inited = false;
 let socketPath = null;
 
@@ -38,6 +30,21 @@ const WorkbenchServerPatch = {
                 return handler.apply(handler, args);
             }
         };
+    },
+    detectServerStart() {
+        let count = 0;
+        let max = 50;
+        return new Promise((res) => {
+            let intHandle = setInterval(() => {
+                if (fs.existsSync(WorkbenchServerPatch.socketPath) || count >= max) {
+                    clearInterval(intHandle);
+                    res();
+                } else {
+                    count += 1;
+                }
+            }, 200);
+        })
+       
     },
     _doListen(server, listenTries, callback) {
         let errorHandler = (error) => {
@@ -79,43 +86,27 @@ const WorkbenchServerPatch = {
     }
 };
 
-    async function initializeMethod() {
-    let rootPath = __dirname;
-    let entryPath = FRAMEWORK.entry || '';
-    if (!path.isAbsolute(entryPath)) {
-        entryPath = path.join(rootPath, entryPath);
-    }
-    // 入口文件需导出模块
-    if (fs.existsSync(entryPath)) {
+async function initializeMethod() {
+    if (serverlessConfig.FRAMEWORK && serverlessConfig.FRAMEWORK.type) {
         socketPath = path.join(os.tmpdir(), `server-${Date.now()}.sock`);
         if (fs.existsSync(socketPath)) {
             fs.unlinkSync(socketPath);
         }
         WorkbenchServerPatch.setupHttpServer(socketPath);
-        let app = require(entryPath);
-        if (typeof app === 'function' && !app['emit']) {
-            app = await app();
+        if (typeof serverlessConfig.run === 'function') {
+            await serverlessConfig.run();
         }
         inited = true;
-    } else {
+    }
+    else {
         console.error(`[workbench-serverless]: 存量应用初始化失败，没有可执行的入口文件`)
     }
 }
 
-module.exports.initializer = WorkbenchServerPatch.asyncWrapper(async (...args) => {
-    if (FRAMEWORK.entry) {
-        inited = true;
-        return;
-    }
-    if (!inited) {
-        await initializeMethod();
-    }
-});
-
 module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context, callback) => {
     try {
         if (!inited) {
-            if (FRAMEWORK.entry) {
+            if (serverlessConfig.FRAMEWORK && serverlessConfig.FRAMEWORK.type) {
                 await initializeMethod();
             } else {
                 inited = true;
@@ -127,8 +118,9 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
 
         let requestCtx = JSON.parse(event);
         // 存量项目
-        if (FRAMEWORK.entry) {
+        if (serverlessConfig.FRAMEWORK && serverlessConfig.FRAMEWORK.type) {
             try {
+                await WorkbenchServerPatch.detectServerStart();
                 let ctx = {};
                 let data = await new Promise((resolve, reject) => {
                     delete requestCtx.headers['content-length'];
@@ -233,8 +225,8 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
 
                 if (fileExt) {
                     for (let v of pathArray) {
-                        console.info("[workbench-serverless]: 安全检查:" + v, (SAFE.includes(v)));
-                        if (SAFE.includes(v)) {
+                        console.info("[workbench-serverless]: 安全检查:" + v, (serverlessConfig.SAFE.includes(v)));
+                        if (serverlessConfig.SAFE.includes(v)) {
                         callback(null, htmlResponse);
                         return;
                         }
@@ -251,7 +243,7 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
                                 isBase64Encoded: true,
                                 statusCode: 200,
                                 headers: {
-                                "Content-type": MIME.getType(fileExt)
+                                "Content-type": MIME.getType && MIME.getType(fileExt) || MIME.lookup && MIME.lookup(fileExt)
                                 },
                                 body: Buffer.from(data).toString("base64")
                             }
