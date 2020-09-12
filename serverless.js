@@ -115,8 +115,7 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
                 return callback(new Error('存量应用初始化失败'));
             }
         }
-
-        let requestCtx = JSON.parse(event);
+        let requestCtx = JSON.parse(event.toString());
         // 存量项目
         if (serverlessConfig.FRAMEWORK && serverlessConfig.FRAMEWORK.type) {
             try {
@@ -125,14 +124,17 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
                 let data = await new Promise((resolve, reject) => {
                     delete requestCtx.headers['content-length'];
                     delete requestCtx.headers['accept-encoding'];
+                    let method = requestCtx.httpMethod || requestCtx.method
+                    let hasBody = ['PATCH', 'POST', 'PUT'];
                     let opts = {
                         uri: `http://unix:${socketPath}:${requestCtx.path}`,
                         qs: requestCtx.queryParameters,
-                        method: requestCtx.httpMethod || requestCtx.method,
-                        body:
-                        typeof requestCtx.body === 'string'
+                        method,
+                        body: hasBody.includes(method) ? (requestCtx.isBase64Encoded ? Buffer.from(requestCtx.body, 'base64'):
+                          typeof requestCtx.body === 'string'
                             ? requestCtx.body
-                            : JSON.stringify(requestCtx.body),
+                            : JSON.stringify(requestCtx.body)) : null,
+                        
                         headers: requestCtx.headers,
                         encoding: null,
                         followRedirect: false,
