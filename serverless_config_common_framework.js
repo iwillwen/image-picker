@@ -1,6 +1,6 @@
 const FRAMEWORK = module.exports.FRAMEWORK = {
-    type: 'nuxt',
-    entry: 'server.js'
+    type: '框架名称，如：express, koa, next, nuxt 等',
+    entry: '应用入口文件，如：app.js, server.js 等'
 };
 
 module.exports.SAFE = [
