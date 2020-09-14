@@ -2,7 +2,7 @@
 > 已有的NodeJS应用无需改造即可快速通过此方案部署到Serverless架构之上，享受实时弹性、按量付费的收益。
 
 ## 如何迁移
-> 前提：应用文件总大小小于 50MB
+> 前提：应用文件总大小小于 100MB
 
 > [Express应用迁移方案](https://help.aliyun.com/document_detail/180016.html#h1--nodejs-2)
 
@@ -13,6 +13,28 @@
 > [Next应用迁移方案](http://help.aliyun.com/document_detail/183599.html)
 
 > [Nuxt应用迁移方案](https://help.aliyun.com/document_detail/183673.html)
+
+## 迁移纯前端应用
+- 直接上传纯前端应用到 CloudIDE
+- 在 package.json 中，添加开发依赖
+```
+"mime":"*",
+"request":"*"
+```
+- 更新部署脚本，打开 .workbench 文件，编辑 CICD 命令
+```
+"cicd": {
+    "frontend-build": "mkdir zip && rsync -a --exclude node_modules/ --exclude package-lock.json --exclude zip/ . ./zip && cd zip && npm install --production",
+    "backend-build": "cd zip && npm run tsc",
+    "package": "cd zip && zip -r ../code.zip ./ -x '*.git*' -x '*.zip' -x '.DS_Store' && cd ../ && rm -rf zip"
+  }
+```
+
+  - frontend-build，前端应用构建脚本，工作目录为根目录，核心要求：根据应用的实际情况，将要部署到线上去的所有文件打包保存到根目录 zip 目录之下
+  - backend-build，后端应用构建脚本，工作目录为根目录，核心要求：根据应用的实际情况，将要部署到线上去的所有文件打包保存到根目录 zip 目录之下
+  - package，部署脚本，工作目录为根目录，核心要求：将根目录下的 zip 目录压缩成 code.zip（可选：删除构建的临时目录 zip）
+
+- 部署上线
 
 ## 数据库示例
 - 如果你的应用需要操作数据库，可以参考本示例中的数据库示例
