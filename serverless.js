@@ -123,7 +123,15 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
                 let ctx = {};
                 let data = await new Promise((resolve, reject) => {
                     delete requestCtx.headers['content-length'];
+                    delete requestCtx.headers['Content-Length'];
                     delete requestCtx.headers['accept-encoding'];
+                    delete requestCtx.headers['Accept-Encoding'];
+
+                    try {
+                      JSON.parse(requestCtx.body);
+                      requestCtx.headers['Content-Type'] = requestCtx.headers['content-type'] = 'application/json';
+                    } catch(e) {}                   
+                    
                     let method = requestCtx.httpMethod || requestCtx.method
                     let hasBody = ['PATCH', 'POST', 'PUT'];
                     let opts = {
