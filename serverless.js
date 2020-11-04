@@ -35,6 +35,9 @@ const WorkbenchServerPatch = {
         let count = 0;
         let max = 50;
         return new Promise((res) => {
+            if (fs.existsSync(WorkbenchServerPatch.socketPath)) {
+                return res();
+            }
             let intHandle = setInterval(() => {
                 if (fs.existsSync(WorkbenchServerPatch.socketPath) || count >= max) {
                     clearInterval(intHandle);
