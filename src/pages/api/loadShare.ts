@@ -21,13 +21,17 @@ const handler: NextApiHandler = async (req, res) => {
   const client = new OSS(OssOption);
   const { key } = req.query;
 
-  if (!isString(key)) return res.status(404);
+  if (!isString(key)) return res.status(404).json({ message: "Not Found" });
 
-  const ossReply = await client.get(key);
+  try {
+    const ossReply = await client.get(key);
 
-  res.status(200).json({
-    content: JSON.parse(ossReply.content),
-  });
+    res.status(200).json({
+      content: JSON.parse(ossReply.content),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export default handler;

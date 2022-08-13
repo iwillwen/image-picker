@@ -19,35 +19,44 @@ const OssOption: OSS.Options = {
 };
 
 const handler: NextApiHandler = async (req, res) => {
-  if (req.method !== "POST") return;
-
-  const client = new OSS(OssOption);
-  const { access_token } = req.query;
-  const body = req.body;
-
-  const url = formatApiUrl(API_BASE, "/rest/2.0/xpan/nas", {
-    method: "uinfo",
-    access_token,
-  });
-
-  const resp = await fetch(url);
-  const reply = (await resp.json()) as { uk?: number };
-
-  if (!reply.uk) {
-    res.status(401).json(reply);
+  if (req.method !== "POST") {
+    res.status(405).json({
+      message: "Method Not Allowed",
+    });
     return;
   }
 
-  const objectKey = `${reply.uk}-${genUUID()}`;
+  try {
+    const client = new OSS(OssOption);
+    const { access_token } = req.query;
+    const body = req.body;
 
-  const ossReply = await client.put(
-    objectKey,
-    Buffer.from(JSON.stringify(body))
-  );
-  res.status(200).json({
-    ...ossReply,
-    key: objectKey,
-  });
+    const url = formatApiUrl(API_BASE, "/rest/2.0/xpan/nas", {
+      method: "uinfo",
+      access_token,
+    });
+
+    const resp = await fetch(url);
+    const reply = (await resp.json()) as { uk?: number };
+
+    if (!reply.uk) {
+      res.status(401).json(reply);
+      return;
+    }
+
+    const objectKey = `${reply.uk}-${genUUID()}`;
+
+    const ossReply = await client.put(
+      objectKey,
+      Buffer.from(JSON.stringify(body))
+    );
+    res.status(200).json({
+      ...ossReply,
+      key: objectKey,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 export default handler;

@@ -18,7 +18,6 @@ const OssOption: OSS.Options = {
 
 const handler: NextApiHandler = async (req, res) => {
   const { key } = req.query;
-  const client = new OSS(OssOption);
 
   if (!isString(key)) {
     res.status(400).json({
@@ -30,6 +29,7 @@ const handler: NextApiHandler = async (req, res) => {
   const name = key + "-selection";
 
   try {
+    const client = new OSS(OssOption);
     const info = await client.head(name);
     if (!info) {
       res.status(200).json([]);
