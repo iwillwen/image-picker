@@ -117,7 +117,7 @@ export function useShare() {
     manual: true,
   });
   const sharedImages = useMemo<PcsImage[]>(
-    () => JSON.parse(loadShareData ?? "[]"),
+    () => loadShareData ?? [],
     [loadShareData]
   );
 
