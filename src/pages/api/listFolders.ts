@@ -19,6 +19,7 @@ const handler: NextApiHandler = async (req, res) => {
   console.debug("API URL: ", url);
   const resp = await fetch(url);
   const data = (await resp.json()) as any;
+  console.debug("API REPLY: ", JSON.stringify(data));
 
   return data?.["list"]?.map((row: any) => row["path"] as string) ?? [];
 };
