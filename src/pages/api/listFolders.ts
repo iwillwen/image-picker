@@ -16,6 +16,7 @@ const handler: NextApiHandler = async (req, res) => {
     desc: desc ?? 1,
   });
 
+  console.debug("API URL: ", url);
   const resp = await fetch(url);
   const data = (await resp.json()) as any;
 
