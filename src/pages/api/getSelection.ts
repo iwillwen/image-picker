@@ -27,18 +27,30 @@ const handler: NextApiHandler = async (req, res) => {
     return;
   }
 
-  const ossReply = await client.get(key + "-selection");
-  if (!ossReply?.content) {
-    res.status(404).json({
-      error: "not found share " + key,
-    });
-    return;
+  const name = key + "-selection";
+
+  try {
+    const info = await client.head(name);
+    if (!info) {
+      res.status(200).json([]);
+      return;
+    }
+
+    const ossReply = await client.get(name);
+    if (!ossReply?.content) {
+      res.status(404).json({
+        error: "not found share " + key,
+      });
+      return;
+    }
+
+    const buffer = Buffer.from(ossReply.content);
+    const data = JSON.parse(buffer.toString());
+
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(200).json([]);
   }
-
-  const buffer = Buffer.from(ossReply.content);
-  const data = JSON.parse(buffer.toString());
-
-  res.status(200).json(data);
 };
 
 export default handler;
