@@ -91,7 +91,7 @@ export function useBaiduPCS(options: BaiduPcsOptions = {}) {
             order: options.order ?? "time",
             desc: options.desc ?? 1,
             web: 1,
-            only_jpg: options.onlyJpg ? 1 : 0,
+            only_jpg: 1,
           })
       );
       return await res.json();
