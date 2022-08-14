@@ -65,7 +65,7 @@ const ROOT_LABEL = "根目录";
 const ROW_PER_PAGE = 20;
 
 export async function getServerSideProps() {
-  return { props: {} }
+  return { props: {} };
 }
 
 export default function FolderList() {
@@ -83,7 +83,7 @@ export default function FolderList() {
   const { createShare, createdShare, createShareLoading, generateShareUrl } =
     useShare();
   const currentPath = useMemo(
-    () => "/" + router.query.path || '',
+    () => "/" + (router.query.path || ""),
     [router.query.path]
   );
   const currentPathRef = useLatest(currentPath);
