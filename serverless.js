@@ -133,7 +133,7 @@ module.exports.handler = WorkbenchServerPatch.asyncWrapper(async (event, context
                     try {
                       JSON.parse(requestCtx.body);
                       requestCtx.headers['Content-Type'] = requestCtx.headers['content-type'] = 'application/json';
-                    } catch(e) {}                   
+                    } catch(e) {}
                     
                     let method = requestCtx.httpMethod || requestCtx.method
                     let hasBody = ['PATCH', 'POST', 'PUT'];
