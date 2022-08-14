@@ -225,7 +225,9 @@ export default function FolderList() {
       return;
     }
 
-    listImages(currentPathRef.current);
+    listImages(currentPathRef.current, {
+      onlyJpg: true,
+    });
   }, [shouldListImages]);
 
   const toolbar = (
