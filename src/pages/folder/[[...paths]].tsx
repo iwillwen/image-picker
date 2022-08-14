@@ -64,6 +64,10 @@ const isImageItem = (row?: RowItem): row is ImageItem => row?.isImage;
 const ROOT_LABEL = "根目录";
 const ROW_PER_PAGE = 20;
 
+export async function getServerSideProps() {
+  return { props: {} }
+}
+
 export default function FolderList() {
   const router = useRouter();
   const {

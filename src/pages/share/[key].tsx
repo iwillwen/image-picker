@@ -34,6 +34,10 @@ import {
   TickSquare,
 } from "react-iconly";
 
+export async function getServerSideProps() {
+  return { props: {} }
+}
+
 export default function Share() {
   const router = useRouter();
   const { key } = router.query;
