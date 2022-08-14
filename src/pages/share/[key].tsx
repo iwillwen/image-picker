@@ -112,7 +112,7 @@ export default function Share() {
     if (!isString(key) || isEmpty(selectedImagesList)) return;
 
     const selection = selectedImagesList.map((row) => row.filename);
-    const textData = JSON.stringify(selection);
+    const textData = selection.join(",");
 
     navigator.clipboard.writeText(textData);
 
