@@ -137,7 +137,7 @@ export function useShare() {
   });
 
   const generateShareUrl = (key: string) => {
-    return window.location.origin + "/share/" + key;
+    return window.location.origin + "/share?key=" + key;
   };
 
   return {
