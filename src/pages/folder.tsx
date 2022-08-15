@@ -21,6 +21,7 @@ import {
   Popover,
   Loading,
   NormalColors,
+  usePagination,
 } from "@nextui-org/react";
 import {
   Folder,
@@ -139,6 +140,9 @@ export default function FolderList() {
     () => Math.ceil((rowItems.length || 1) / ROW_PER_PAGE),
     [rowItems]
   );
+  const pagination = usePagination({
+    total: totalPages,
+  });
 
   // Previewing
   const [selectedImage, setSelectImage] = useState<ImageItem>();

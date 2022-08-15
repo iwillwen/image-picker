@@ -8,7 +8,11 @@ export default function Home() {
   const { accessToken } = useBaiduPCS();
 
   useEffect(() => {
-    if (!accessToken) router.push("/login");
+    if (!accessToken) {
+      router.push("/login");
+    } else {
+      router.push("/folder");
+    }
   }, [accessToken]);
 
   return <div></div>;

@@ -7,8 +7,6 @@ import React, {
 } from "react";
 import { useRouter } from "next/router";
 import {
-  Row,
-  Col,
   Grid,
   Card,
   Loading,
@@ -16,16 +14,12 @@ import {
   Text,
   Button,
   Switch,
-  Spacer,
   Modal,
   useModal,
   NormalColors,
 } from "@nextui-org/react";
 import { isEmpty, isString } from "lodash";
-import { useSet } from "ahooks";
-
-import { useShare, Selection } from "../hooks/useShare";
-import { PcsImage } from "../hooks/useBaiduPCS";
+import { useSet, useResponsive, useReactive } from "ahooks";
 import {
   ChevronLeftCircle,
   ChevronRightCircle,
@@ -34,16 +28,20 @@ import {
   TickSquare,
 } from "react-iconly";
 
+import { useShare, Selection } from "../hooks/useShare";
+import type { PcsImage } from "../hooks/useBaiduPCS";
+import Panzoom from "../components/panzoom";
+
 export async function getServerSideProps() {
-  return { props: {} }
+  return { props: {} };
 }
 
 export default function Share() {
   const router = useRouter();
   const { key } = router.query;
+  const responsive = useResponsive();
   const { setVisible: setPopupPreviewVisible, bindings: bindingsPopupPreview } =
     useModal();
-
   const {
     loadShare,
     sharedImages,
@@ -51,7 +49,6 @@ export default function Share() {
     makeSelection,
     makeSelectionLoading,
     getSelection,
-    selectionRecord,
   } = useShare();
   const [
     selectedImages,
@@ -138,15 +135,16 @@ export default function Share() {
   }, [key]);
 
   const imagesListCard = (
-    <Col span={6}>
+    <Grid md={6} sm={12}>
       <Card>
         <Card.Body css={{ minHeight: "80vh" }}>
           {shareLoading ? <Loading size="xl" css={{ height: "100%" }} /> : null}
 
           <Grid.Container gap={1}>
             {imagesList.map((image, index) => (
-              <Grid xs={12} sm={6} lg={4} key={image.fsId}>
+              <Grid xs={6} md={4} key={image.fsId}>
                 <Image
+                  data-fs-id={image.fsId}
                   showSkeleton
                   src={image.thumb}
                   objectFit="cover"
@@ -157,7 +155,12 @@ export default function Share() {
                     outlineOffset: "-7px",
                     cursor: "pointer",
                   }}
-                  onClick={() => setCursor(index)}
+                  onClick={() => {
+                    setCursor(index);
+                    if (isMobile) {
+                      setPopupPreviewVisible(true);
+                    }
+                  }}
                   onDoubleClick={() => toggleSelect(image.fsId)}
                 />
               </Grid>
@@ -165,11 +168,11 @@ export default function Share() {
           </Grid.Container>
         </Card.Body>
       </Card>
-    </Col>
+    </Grid>
   );
 
   const previewCard = (
-    <Row>
+    <Grid>
       <Card>
         {showingImage ? (
           <>
@@ -237,125 +240,199 @@ export default function Share() {
           </>
         ) : null}
       </Card>
-    </Row>
+    </Grid>
   );
+
+  const isMobile = responsive?.xs && !responsive?.md;
 
   const popupPreview = showingImage ? (
     <Modal
-      width="90vw"
-      css={{ maxH: "fit-content" }}
+      fullScreen={isMobile}
+      width="80vw"
+      css={{
+        maxH: isMobile ? "fit-content" : null,
+      }}
       closeButton
       {...bindingsPopupPreview}
     >
-      <Modal.Header>{showingImage.filename}</Modal.Header>
-      <Modal.Body>
-        <Image
-          objectFit="cover"
-          src={showingImage.thumb}
-          alt={showingImage.filename}
-        />
+      <Modal.Header>
+        <Text>{showingImage.filename}</Text>
+      </Modal.Header>
+      <Modal.Body
+        css={{
+          p: responsive?.xs ? "$0" : "$1",
+        }}
+      >
+        <Panzoom options={{ doubleClick: "toggleZoom", click: false }}>
+          <div
+            style={{
+              width: "100%",
+              height: isMobile ? "80vh" : null,
+            }}
+          >
+            <Image
+              objectFit="contain"
+              src={showingImage.thumb}
+              alt={showingImage.filename}
+              width="100%"
+              height="100%"
+            />
+          </div>
+        </Panzoom>
       </Modal.Body>
+      <Modal.Footer>
+        <Grid.Container justify="space-between" alignItems="center">
+          <Grid>
+            <Button
+              auto
+              size="sm"
+              icon={<ChevronLeftCircle />}
+              disabled={cursor === 0}
+              onPress={() => setCursor(cursor - 1)}
+            >
+              上一张
+            </Button>
+          </Grid>
+          <Grid sm={4}>
+            <Grid.Container gap={0.5} justify="center" alignItems="center">
+              <Grid>
+                <Switch
+                  size="sm"
+                  checked={showingImage.isSelected}
+                  onChange={(evt) => {
+                    if (evt.target.checked) {
+                      addSelect(showingImage.fsId);
+                    } else {
+                      removeSelect(showingImage.fsId);
+                    }
+                  }}
+                />
+              </Grid>
+              <Grid>
+                <Text>选择这张图片</Text>
+              </Grid>
+            </Grid.Container>
+          </Grid>
+          <Grid>
+            <Button
+              auto
+              size="sm"
+              icon={<ChevronRightCircle />}
+              disabled={cursor >= imagesList.length - 1}
+              onPress={() => setCursor(cursor + 1)}
+            >
+              下一张
+            </Button>
+          </Grid>
+        </Grid.Container>
+      </Modal.Footer>
     </Modal>
   ) : null;
 
   const selectedImagesListCard =
     selectedImages.size > 0 ? (
-      <>
-        <Spacer y={1} />
-        <Row>
-          <Card>
-            <Card.Header>
-              <Grid.Container justify="space-between">
-                <Grid>
-                  <Text h3>
-                    已选图片列表（已选 {selectedImagesList.length} 张）
-                  </Text>
-                </Grid>
-                <Grid>
-                  <Grid.Container gap={0.5}>
-                    <Grid>
-                      <Button
-                        bordered
-                        auto
-                        size="sm"
-                        onPress={resetSelect}
-                        color="error"
-                      >
-                        清空
-                      </Button>
-                    </Grid>
-                    <Grid>
-                      <Button
-                        auto
-                        bordered
-                        color={copyBtnState[0]}
-                        icon={copyBtnState[1]}
-                        size="sm"
-                        onPress={handleCopySelection}
-                      >
-                        复制选择数据
-                      </Button>
-                    </Grid>
-                    <Grid>
-                      <Button
-                        auto
-                        color={submitBtnState[0]}
-                        icon={submitBtnState[1]}
-                        size="sm"
-                        onPress={handleSubmitSelection}
-                        {...(makeSelectionLoading
-                          ? {
-                              disabled: true,
-                              bordered: true,
-                              color: "secondary",
-                            }
-                          : {})}
-                      >
-                        {!makeSelectionLoading ? (
-                          "保存选择"
-                        ) : (
-                          <Loading color="currentColor" size="sm" />
-                        )}
-                      </Button>
-                    </Grid>
-                  </Grid.Container>
-                </Grid>
-              </Grid.Container>
-            </Card.Header>
-            <Card.Body>
-              <Grid.Container>
-                {selectedImagesList.map((image) => (
-                  <Grid xs={1} key={image.fsId}>
-                    <Image
-                      src={image.thumbs["url1"]}
-                      objectFit="cover"
-                      alt={image.filename}
-                      css={{ cursor: "pointer", aspectRatio: "1 / 1" }}
-                      onClick={() => setCursor(image.index)}
-                    />
+      <Grid>
+        <Card>
+          <Card.Header>
+            <Grid.Container justify="space-between">
+              <Grid>
+                <Text h3>
+                  已选图片列表（已选 {selectedImagesList.length} 张）
+                </Text>
+              </Grid>
+              <Grid>
+                <Grid.Container gap={0.5}>
+                  <Grid>
+                    <Button
+                      bordered
+                      auto
+                      size="sm"
+                      onPress={resetSelect}
+                      color="error"
+                    >
+                      清空
+                    </Button>
                   </Grid>
-                ))}
-              </Grid.Container>
-            </Card.Body>
-          </Card>
-        </Row>
-      </>
+                  <Grid>
+                    <Button
+                      auto
+                      bordered
+                      color={copyBtnState[0]}
+                      icon={copyBtnState[1]}
+                      size="sm"
+                      onPress={handleCopySelection}
+                    >
+                      复制选择数据
+                    </Button>
+                  </Grid>
+                  <Grid>
+                    <Button
+                      auto
+                      color={submitBtnState[0]}
+                      icon={submitBtnState[1]}
+                      size="sm"
+                      onPress={handleSubmitSelection}
+                      {...(makeSelectionLoading
+                        ? {
+                            disabled: true,
+                            bordered: true,
+                            color: "secondary",
+                          }
+                        : {})}
+                    >
+                      {!makeSelectionLoading ? (
+                        "保存选择"
+                      ) : (
+                        <Loading color="currentColor" size="sm" />
+                      )}
+                    </Button>
+                  </Grid>
+                </Grid.Container>
+              </Grid>
+            </Grid.Container>
+          </Card.Header>
+          <Card.Body>
+            <Grid.Container>
+              {selectedImagesList.map((image) => (
+                <Grid xs={1} key={image.fsId}>
+                  <Image
+                    src={image.thumbs["url1"]}
+                    objectFit="cover"
+                    alt={image.filename}
+                    css={{ cursor: "pointer", aspectRatio: "1 / 1" }}
+                    onClick={() => {
+                      setCursor(image.index);
+                      if (isMobile) {
+                        setPopupPreviewVisible(true);
+                      }
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid.Container>
+          </Card.Body>
+        </Card>
+      </Grid>
     ) : null;
 
   return (
-    <Row gap={1}>
+    <Grid.Container gap={1}>
+      {isMobile ? selectedImagesListCard : null}
       {imagesListCard}
-      <Col
-        span={6}
+      <Grid
+        xs={0}
+        md={6}
         css={{
           position: "sticky",
           top: 20,
         }}
       >
-        {previewCard}
-        {selectedImagesListCard}
+        <Grid.Container gap={1} direction="column">
+          {previewCard}
+          {!isMobile ? selectedImagesListCard : null}
+        </Grid.Container>
         {popupPreview}
-      </Col>
-    </Row>
+      </Grid>
+    </Grid.Container>
   );
 }
