@@ -23,8 +23,8 @@ const handler: NextApiHandler = async (req, res) => {
         recursion: 0,
         access_token,
         parent_path,
-        order: order ?? "time",
-        desc: desc ?? 1,
+        order: order ?? "name",
+        desc: desc ?? 0,
         web: 1,
       })
     );

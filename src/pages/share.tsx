@@ -18,7 +18,7 @@ import {
   useModal,
   NormalColors,
 } from "@nextui-org/react";
-import { isEmpty, isString } from "lodash";
+import { isEmpty, isString, sortBy } from "lodash";
 import { useSet, useResponsive, useReactive } from "ahooks";
 import {
   ChevronLeftCircle,
@@ -64,10 +64,13 @@ export default function Share() {
   ]);
 
   const imagesList = useMemo(() => {
-    return sharedImages.map<PcsImage & { isSelected?: boolean }>((image) => ({
-      ...image,
-      isSelected: selectedImages.has(image.fsId),
-    }));
+    return sortBy(
+      sharedImages.map<PcsImage & { isSelected?: boolean }>((image) => ({
+        ...image,
+        isSelected: selectedImages.has(image.fsId),
+      })),
+      'filename',
+    );
   }, [sharedImages, selectedImages]);
 
   const showingImage = useMemo(() => imagesList[cursor], [imagesList, cursor]);
