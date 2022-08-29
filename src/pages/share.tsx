@@ -172,7 +172,7 @@ export default function Share() {
   );
 
   const previewCard = (
-    <Grid>
+    <Grid css={{ p: '$0' }}>
       <Card>
         {showingImage ? (
           <>
@@ -425,6 +425,7 @@ export default function Share() {
         css={{
           position: "sticky",
           top: 20,
+          alignSelf: "start",
         }}
       >
         <Grid.Container gap={1} direction="column">
