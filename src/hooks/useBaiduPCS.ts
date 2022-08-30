@@ -88,8 +88,8 @@ export function useBaiduPCS(options: BaiduPcsOptions = {}) {
             method: "imagelist",
             access_token: accessToken,
             parent_path: dir,
-            order: options.order ?? "time",
-            desc: options.desc ?? 1,
+            order: options.order ?? "name",
+            desc: options.desc ?? 0,
             web: 1,
             only_jpg: 1,
           })
