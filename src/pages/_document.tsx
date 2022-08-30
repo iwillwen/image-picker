@@ -33,7 +33,9 @@ function MyDocument() {
         <Container css={{ p: padding }}>
           <Spacer y={1} />
           <Row>
-            <Text h2>选图小帮手（百度云盘版）</Text>
+            <Text h2 css={{ marginLeft: "$10" }}>
+              选图小帮手（百度云盘版）
+            </Text>
           </Row>
           <Spacer y={1} />
           <Main />

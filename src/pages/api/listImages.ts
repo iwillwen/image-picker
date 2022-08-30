@@ -11,7 +11,6 @@ export type PcsImage = {
   fsId: string;
   path: string;
   thumb: string;
-  thumbs: Record<string, string>;
 };
 
 type ListImagesOptions = {
@@ -61,8 +60,12 @@ export async function listImages(opts: ListImagesOptions): Promise<PcsImage[]> {
           filename: row["server_filename"],
           fsId: row["fs_id"],
           path: row["path"],
-          thumb: row["thumbs"]?.["url3"].replace("c850_u580", "c1000_u1000"),
-          thumbs: row["thumbs"],
+          thumb: row["thumbs"]?.["url3"]
+            .replace("c850_u580", "c1000_u1000")
+            .replace(
+              "thumbnail0.baidupcs.com",
+              "photo-picker-thumbnail.oss-cn-shanghai.aliyuncs.com"
+            ),
         } as PcsImage)
     ) ?? []
   ).filter((row: PcsImage) => {

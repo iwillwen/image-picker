@@ -16,10 +16,13 @@ import {
   Switch,
   Modal,
   useModal,
+  Pagination,
+  usePagination,
   NormalColors,
+  Row,
 } from "@nextui-org/react";
 import { isEmpty, isString, sortBy } from "lodash";
-import { useSet, useResponsive, useReactive } from "ahooks";
+import { useSet, useResponsive } from "ahooks";
 import {
   ChevronLeftCircle,
   ChevronRightCircle,
@@ -36,10 +39,13 @@ export async function getServerSideProps() {
   return { props: {} };
 }
 
+const PAGE_SIZE = 3 * (2 * 3);
+
 export default function Share() {
   const router = useRouter();
   const { key } = router.query;
   const responsive = useResponsive();
+  const isMobile = responsive?.xs && !responsive?.md;
   const { setVisible: setPopupPreviewVisible, bindings: bindingsPopupPreview } =
     useModal();
   const {
@@ -54,7 +60,6 @@ export default function Share() {
     selectedImages,
     { add: addSelect, remove: removeSelect, reset: resetSelect },
   ] = useSet<number>();
-  const [cursor, setCursor] = useState(0);
   const [submitBtnState, setSubmitBtnState] = useState<
     [NormalColors, ReactNode]
   >(["primary", <Send key="submit-btn" />]);
@@ -69,9 +74,29 @@ export default function Share() {
         ...image,
         isSelected: selectedImages.has(image.fsId),
       })),
-      'filename',
+      "filename"
     );
   }, [sharedImages, selectedImages]);
+
+  const totalPage = useMemo(
+    () => Math.ceil(imagesList.length / PAGE_SIZE),
+    [imagesList]
+  );
+  const {
+    active: activePage,
+    setPage,
+    previous: goPrevPage,
+    next: goNextPage,
+  } = usePagination({
+    total: totalPage,
+  });
+  const [cursor, setCursor] = useState(0);
+  const showImagesList = useMemo(() => {
+    return imagesList.slice(
+      (activePage - 1) * PAGE_SIZE,
+      activePage * PAGE_SIZE
+    );
+  }, [imagesList, activePage]);
 
   const showingImage = useMemo(() => imagesList[cursor], [imagesList, cursor]);
 
@@ -138,13 +163,13 @@ export default function Share() {
   }, [key]);
 
   const imagesListCard = (
-    <Grid md={6} sm={12}>
+    <Grid md={6} sm={12} style={{ width: "100%" }}>
       <Card>
         <Card.Body css={{ minHeight: "80vh" }}>
           {shareLoading ? <Loading size="xl" css={{ height: "100%" }} /> : null}
 
           <Grid.Container gap={1}>
-            {imagesList.map((image, index) => (
+            {showImagesList.map((image, index) => (
               <Grid xs={6} md={4} key={image.fsId}>
                 <Image
                   data-fs-id={image.fsId}
@@ -159,7 +184,7 @@ export default function Share() {
                     cursor: "pointer",
                   }}
                   onClick={() => {
-                    setCursor(index);
+                    setCursor((activePage - 1) * PAGE_SIZE + index);
                     if (isMobile) {
                       setPopupPreviewVisible(true);
                     }
@@ -170,12 +195,22 @@ export default function Share() {
             ))}
           </Grid.Container>
         </Card.Body>
+        <Card.Footer>
+          <Row css={{ width: "100%", paddingBottom: "$5" }} justify="center">
+            <Pagination
+              rounded
+              page={activePage}
+              total={totalPage}
+              onChange={setPage}
+            />
+          </Row>
+        </Card.Footer>
       </Card>
     </Grid>
   );
 
   const previewCard = (
-    <Grid css={{ p: '$0' }}>
+    <Grid css={{ p: "$0", alignSelf: "center", width: "100%" }}>
       <Card>
         {showingImage ? (
           <>
@@ -186,8 +221,8 @@ export default function Share() {
               showSkeleton
               src={showingImage.thumb}
               width="100%"
+              css={{ maxH: "45vh" }}
               objectFit="contain"
-              css={{ maxH: "50vh" }}
               onClick={() => setPopupPreviewVisible(true)}
             />
             <Card.Footer>
@@ -195,10 +230,14 @@ export default function Share() {
                 <Grid>
                   <Button
                     auto
+                    bordered
                     size="sm"
                     icon={<ChevronLeftCircle />}
                     disabled={cursor === 0}
-                    onPress={() => setCursor(cursor - 1)}
+                    onPress={() => {
+                      if (cursor % PAGE_SIZE === 0) goPrevPage();
+                      setCursor(cursor - 1);
+                    }}
                   >
                     上一张
                   </Button>
@@ -230,10 +269,14 @@ export default function Share() {
                 <Grid>
                   <Button
                     auto
+                    bordered
                     size="sm"
                     icon={<ChevronRightCircle />}
                     disabled={cursor >= imagesList.length - 1}
-                    onPress={() => setCursor(cursor + 1)}
+                    onPress={() => {
+                      if ((cursor + 1) % PAGE_SIZE === 0) goNextPage();
+                      setCursor(cursor + 1);
+                    }}
                   >
                     下一张
                   </Button>
@@ -246,17 +289,34 @@ export default function Share() {
     </Grid>
   );
 
-  const isMobile = responsive?.xs && !responsive?.md;
+  const selectedImagesListEl =
+    selectedImagesList.length > 0 ? (
+      <Grid.Container>
+        {selectedImagesList.map((image) => (
+          <Grid xs={1} key={image.fsId}>
+            <Image
+              src={image.thumb}
+              objectFit="cover"
+              alt={image.filename}
+              css={{ cursor: "pointer", aspectRatio: "1 / 1" }}
+              onClick={() => {
+                setCursor(image.index);
+                if (isMobile) {
+                  setPopupPreviewVisible(true);
+                }
+              }}
+            />
+          </Grid>
+        ))}
+      </Grid.Container>
+    ) : null;
 
   const popupPreview = showingImage ? (
     <Modal
-      fullScreen={isMobile}
-      width="80vw"
-      css={{
-        maxH: isMobile ? "fit-content" : null,
-      }}
       closeButton
       {...bindingsPopupPreview}
+      width="80vh"
+      fullScreen={isMobile}
     >
       <Modal.Header>
         <Text>{showingImage.filename}</Text>
@@ -264,13 +324,14 @@ export default function Share() {
       <Modal.Body
         css={{
           p: responsive?.xs ? "$0" : "$1",
+          height: isMobile ? "70vh" : null,
         }}
       >
         <Panzoom options={{ doubleClick: "toggleZoom", click: false }}>
           <div
             style={{
               width: "100%",
-              height: isMobile ? "80vh" : null,
+              height: isMobile ? "70vh" : "100%",
             }}
           >
             <Image
@@ -284,57 +345,115 @@ export default function Share() {
         </Panzoom>
       </Modal.Body>
       <Modal.Footer>
-        <Grid.Container justify="space-between" alignItems="center">
-          <Grid>
-            <Button
-              auto
-              size="sm"
-              icon={<ChevronLeftCircle />}
-              disabled={cursor === 0}
-              onPress={() => setCursor(cursor - 1)}
+        <Row>
+          <Grid.Container justify="space-between" alignItems="center">
+            <Grid>
+              <Button
+                auto
+                bordered
+                size="sm"
+                icon={<ChevronLeftCircle />}
+                disabled={cursor === 0}
+                onPress={() => {
+                  if (cursor % PAGE_SIZE === 0) goPrevPage();
+                  setCursor(cursor - 1);
+                }}
+              >
+                上一张
+              </Button>
+            </Grid>
+            <Grid sm={4}>
+              <Grid.Container gap={0.5} justify="center" alignItems="center">
+                <Grid>
+                  <Switch
+                    size="sm"
+                    checked={showingImage.isSelected}
+                    onChange={(evt) => {
+                      if (evt.target.checked) {
+                        addSelect(showingImage.fsId);
+                      } else {
+                        removeSelect(showingImage.fsId);
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid>
+                  <Text>选择这张图片</Text>
+                </Grid>
+              </Grid.Container>
+            </Grid>
+            <Grid>
+              <Button
+                auto
+                bordered
+                size="sm"
+                icon={<ChevronRightCircle />}
+                disabled={cursor >= imagesList.length - 1}
+                onPress={() => {
+                  if ((cursor + 1) % PAGE_SIZE === 0) goNextPage();
+                  setCursor(cursor + 1);
+                }}
+              >
+                下一张
+              </Button>
+            </Grid>
+          </Grid.Container>
+        </Row>
+        {isMobile && selectedImagesList.length > 0 ? (
+          <>
+            <Row
+              css={{
+                maxH: "87px",
+                overflowY: "auto",
+              }}
             >
-              上一张
-            </Button>
-          </Grid>
-          <Grid sm={4}>
-            <Grid.Container gap={0.5} justify="center" alignItems="center">
-              <Grid>
-                <Switch
-                  size="sm"
-                  checked={showingImage.isSelected}
-                  onChange={(evt) => {
-                    if (evt.target.checked) {
-                      addSelect(showingImage.fsId);
-                    } else {
-                      removeSelect(showingImage.fsId);
+              {selectedImagesListEl}
+            </Row>
+            <Row>
+              <Button
+                size="sm"
+                css={{ w: "100%" }}
+                color={submitBtnState[0]}
+                icon={submitBtnState[1]}
+                onPress={handleSubmitSelection}
+                {...(makeSelectionLoading
+                  ? {
+                      disabled: true,
+                      bordered: true,
+                      color: "secondary",
                     }
-                  }}
-                />
-              </Grid>
-              <Grid>
-                <Text>选择这张图片</Text>
-              </Grid>
-            </Grid.Container>
-          </Grid>
-          <Grid>
-            <Button
-              auto
-              size="sm"
-              icon={<ChevronRightCircle />}
-              disabled={cursor >= imagesList.length - 1}
-              onPress={() => setCursor(cursor + 1)}
-            >
-              下一张
-            </Button>
-          </Grid>
-        </Grid.Container>
+                  : {})}
+              >
+                {!makeSelectionLoading ? (
+                  "保存选择"
+                ) : (
+                  <Loading color="currentColor" size="sm" />
+                )}
+              </Button>
+            </Row>
+          </>
+        ) : null}
       </Modal.Footer>
     </Modal>
   ) : null;
 
   const selectedImagesListCard =
-    selectedImages.size > 0 ? (
-      <Grid>
+    selectedImagesList.length > 0 ? (
+      <Grid
+        css={
+          isMobile
+            ? {
+                position: "sticky",
+                alignSelf: "start",
+                top: "10px",
+                zIndex: 99,
+              }
+            : {
+                p: "$0",
+                marginTop: "$5",
+              }
+        }
+      >
         <Card>
           <Card.Header>
             <Grid.Container justify="space-between">
@@ -395,24 +514,9 @@ export default function Share() {
             </Grid.Container>
           </Card.Header>
           <Card.Body>
-            <Grid.Container>
-              {selectedImagesList.map((image) => (
-                <Grid xs={1} key={image.fsId}>
-                  <Image
-                    src={image.thumbs["url1"]}
-                    objectFit="cover"
-                    alt={image.filename}
-                    css={{ cursor: "pointer", aspectRatio: "1 / 1" }}
-                    onClick={() => {
-                      setCursor(image.index);
-                      if (isMobile) {
-                        setPopupPreviewVisible(true);
-                      }
-                    }}
-                  />
-                </Grid>
-              ))}
-            </Grid.Container>
+            <Row css={{ maxH: !isMobile ? "25vh" : null, overflowY: "auto" }}>
+              {selectedImagesListEl}
+            </Row>
           </Card.Body>
         </Card>
       </Grid>
@@ -431,7 +535,7 @@ export default function Share() {
           alignSelf: "start",
         }}
       >
-        <Grid.Container gap={1} direction="column">
+        <Grid.Container direction="column" gap={0}>
           {previewCard}
           {!isMobile ? selectedImagesListCard : null}
         </Grid.Container>
