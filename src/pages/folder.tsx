@@ -204,7 +204,9 @@ export default function FolderList() {
   const handleShare = useCallback(async () => {
     if (!shouldListImages || !images || images.length <= 0) return;
 
-    await createShare(currentPath, images);
+    await createShare(currentPath, images, {
+      onlyJpg: true,
+    });
   }, [currentPath, images, shouldListImages]);
 
   const handleCopyShareURL = (url: string) => {
