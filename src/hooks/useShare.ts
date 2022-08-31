@@ -1,7 +1,8 @@
 import { useCallback, useMemo } from "react";
 import queryString from "query-string";
+import { extname } from "path";
 
-import { useBaiduPCS, PcsImage } from "./useBaiduPCS";
+import { useBaiduPCS, PcsImage, ListOptions } from "./useBaiduPCS";
 import { useRequest, useSessionStorageState } from "ahooks";
 
 export type Selection = Pick<PcsImage, "filename" | "fsId">;
@@ -12,7 +13,7 @@ export function useShare() {
     useSessionStorageState<Record<string, string>>("share_cache");
 
   const create = useCallback(
-    async (path: string, imageList: PcsImage[]) => {
+    async (path: string, imageList: PcsImage[], listOptions?: ListOptions) => {
       if (!accessToken) return;
 
       if (shareCache?.[path])
@@ -20,30 +21,58 @@ export function useShare() {
           key: shareCache[path],
         };
 
-      const res = await fetch(
-        "/api/createShare?" +
-          queryString.stringify({
-            access_token: accessToken,
-            path,
-          }),
-        {
+      if (imageList.length > 500 && listOptions) {
+        const res = await fetch("/api/createShareByListImages", {
           method: "POST",
-          body: JSON.stringify(imageList),
+          body: JSON.stringify({
+            method: "imagelist",
+            access_token: accessToken,
+            parent_path: path,
+            order: listOptions.order ?? "name",
+            desc: listOptions.desc ?? 0,
+            web: 1,
+            only_jpg: 1,
+          }),
           headers: {
             "content-type": "application/json",
           },
+        });
+        const data = await res.json();
+        if (!data?.key) {
+          return {
+            error: "创建分享失败",
+          };
         }
-      );
-      const data = await res.json();
-      if (!data?.key) {
+
         return {
-          error: "创建分享失败",
+          key: data.key,
+        };
+      } else {
+        const res = await fetch(
+          "/api/createShare?" +
+            queryString.stringify({
+              access_token: accessToken,
+              path,
+            }),
+          {
+            method: "POST",
+            body: JSON.stringify(imageList),
+            headers: {
+              "content-type": "application/json",
+            },
+          }
+        );
+        const data = await res.json();
+        if (!data?.key) {
+          return {
+            error: "创建分享失败",
+          };
+        }
+
+        return {
+          key: data.key,
         };
       }
-
-      return {
-        key: data.key,
-      };
     },
     [accessToken, shareCache]
   );
@@ -117,7 +146,10 @@ export function useShare() {
     manual: true,
   });
   const sharedImages = useMemo<PcsImage[]>(
-    () => loadShareData ?? [],
+    () =>
+      (loadShareData ?? []).filter(
+        (row: PcsImage) => extname(row.filename).toLowerCase() === ".jpg"
+      ),
     [loadShareData]
   );
 
