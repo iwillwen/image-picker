@@ -103,7 +103,7 @@ function SelectedImagesCard({
           <Grid.Container justify="space-between">
             <Grid>
               <Text h3 css={{ margin: "$0", lineHeight: "32px" }}>
-                已选图片列表（已选 {selectedImagesList.length} 张）
+                已选图片列表（已选 {(selectedImagesList ?? []).length} 张）
               </Text>
             </Grid>
             <Grid>

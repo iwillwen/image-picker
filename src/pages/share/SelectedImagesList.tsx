@@ -20,13 +20,13 @@ function SelectedImagesList({
   setPopupPreviewVisible,
 }: SelectedImagesListProps) {
   const children =
-    selectedImagesList.length <= 0 ? (
+    (selectedImagesList ?? []).length <= 0 ? (
       <Text css={{ w: "100%", p: "$5", textAlign: "center" }}>
         尚未选择图片
       </Text>
     ) : (
       <Grid.Container>
-        {selectedImagesList.map((image) => (
+        {(selectedImagesList ?? []).map((image) => (
           <Grid xs={1} key={image.fsId}>
             <Image
               src={image.thumb}

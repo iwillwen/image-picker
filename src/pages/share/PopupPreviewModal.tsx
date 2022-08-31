@@ -139,7 +139,7 @@ function PopupPreview({
                 bordered
                 size="sm"
                 icon={<ChevronRightCircle />}
-                disabled={cursor >= imagesList.length - 1}
+                disabled={cursor >= (imagesList ?? []).length - 1}
                 onPress={() => {
                   if ((cursor + 1) % PAGE_SIZE === 0) goNextPage();
                   setCursor(cursor + 1);
@@ -150,7 +150,7 @@ function PopupPreview({
             </Grid>
           </Grid.Container>
         </Row>
-        {isMobile && selectedImagesList.length > 0 ? (
+        {isMobile && (selectedImagesList ?? []).length > 0 ? (
           <>
             <Row
               css={{

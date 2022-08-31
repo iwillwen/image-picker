@@ -33,10 +33,12 @@ function ImageListCard({
   return (
     <Card>
       <Card.Body>
-        {shareLoading ? <Loading size="xl" css={{ height: "100%" }} /> : null}
+        {shareLoading || showImagesList.length <= 0 ? (
+          <Loading size="xl" css={{ height: "100%" }} />
+        ) : null}
 
         <Grid.Container gap={1}>
-          {showImagesList.map((image, index) => (
+          {(showImagesList ?? []).map((image, index) => (
             <Grid xs={6} sm={4} key={image.fsId}>
               <Image
                 data-fs-id={image.fsId}
