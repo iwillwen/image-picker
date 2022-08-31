@@ -10,7 +10,8 @@ import {
   OSS_BUCKET,
 } from "../../constants";
 import { formatApiUrl } from "../../utils";
-import { listImages } from "./listImages";
+import { listImages, PcsImage } from "./listImages";
+import fetch from "node-fetch";
 
 const OssOption: OSS.Options = {
   region: OSS_APP_REGION,
@@ -18,6 +19,17 @@ const OssOption: OSS.Options = {
   accessKeySecret: OSS_APP_APPKEY_SECRET,
   bucket: OSS_BUCKET,
 };
+
+export function prefetchImages(images: PcsImage[]) {
+  return Promise.all(
+    images.map(async (image) => {
+      const res = await fetch(image.thumb, {
+        method: "GET",
+      });
+      return res.size;
+    })
+  );
+}
 
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== "POST") {
@@ -39,6 +51,9 @@ const handler: NextApiHandler = async (req, res) => {
       only_jpg,
       limit: 1000,
     });
+    prefetchImages(list).then((sizes) =>
+      console.log(`Size: ${sizes.reduce((a, b) => a + b)}`)
+    );
 
     const url = formatApiUrl(API_BASE, "/rest/2.0/xpan/nas", {
       method: "uinfo",

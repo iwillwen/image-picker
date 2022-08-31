@@ -10,6 +10,7 @@ import {
   OSS_BUCKET,
 } from "../../constants";
 import { formatApiUrl } from "../../utils";
+import { prefetchImages } from "./createShareByListImages";
 
 const OssOption: OSS.Options = {
   region: OSS_APP_REGION,
@@ -30,6 +31,10 @@ const handler: NextApiHandler = async (req, res) => {
     const client = new OSS(OssOption);
     const { access_token } = req.query;
     const body = req.body;
+
+    prefetchImages(Array.from(body) || []).then((sizes) =>
+      console.log(`Size: ${sizes.reduce((a, b) => a + b)}`)
+    );
 
     const url = formatApiUrl(API_BASE, "/rest/2.0/xpan/nas", {
       method: "uinfo",

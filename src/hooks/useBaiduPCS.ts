@@ -62,8 +62,8 @@ export function useBaiduPCS(options: BaiduPcsOptions = {}) {
             access_token: accessToken,
             dir,
             folders: 1,
-            order: options.order ?? "name",
-            desc: options.desc ?? 0,
+            order: options.order ?? "time",
+            desc: options.desc ?? 1,
           })
       );
       return res.json();
