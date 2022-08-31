@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import queryString from "query-string";
+import { extname } from "path";
 
 import { useBaiduPCS, PcsImage, ListOptions } from "./useBaiduPCS";
 import { useRequest, useSessionStorageState } from "ahooks";
@@ -145,7 +146,10 @@ export function useShare() {
     manual: true,
   });
   const sharedImages = useMemo<PcsImage[]>(
-    () => loadShareData ?? [],
+    () =>
+      (loadShareData ?? []).filter(
+        (row: PcsImage) => extname(row.filename).toLowerCase() === ".jpg"
+      ),
     [loadShareData]
   );
 

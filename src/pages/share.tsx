@@ -20,6 +20,7 @@ import {
   usePagination,
   NormalColors,
   Row,
+  Textarea,
 } from "@nextui-org/react";
 import { isEmpty, isString, sortBy } from "lodash";
 import { useSet, useResponsive } from "ahooks";
@@ -48,6 +49,9 @@ export default function Share() {
   const isMobile = responsive?.xs && !responsive?.md;
   const { setVisible: setPopupPreviewVisible, bindings: bindingsPopupPreview } =
     useModal();
+  const { setVisible: setImportModalVisible, bindings: bindingsImportModal } =
+    useModal();
+  const [dataToImport, setDataToImport] = useState("");
   const {
     loadShare,
     sharedImages,
@@ -152,6 +156,31 @@ export default function Share() {
     }, 2e3);
   }, [key, selectedImagesList]);
 
+  const handlePressImportButton = () => {
+    setImportModalVisible(true);
+  };
+
+  const handleImportSelectionData = useCallback(() => {
+    if (!dataToImport) return;
+
+    const list = dataToImport
+      .split(/[,\n]/)
+      .map((row) => row.split(".")?.[0] ?? null)
+      .filter<string>(isString);
+
+    let importedCount = 0;
+
+    for (const row of list) {
+      const image = imagesList.find((image) => image.filename.startsWith(row));
+      if (!image) continue;
+      addSelect(image.fsId);
+      importedCount += 1;
+    }
+
+    setImportModalVisible(false);
+    alert(`成功导入 ${importedCount} 张图片`);
+  }, [dataToImport, imagesList]);
+
   useEffect(() => {
     if (!isString(key)) return;
 
@@ -165,7 +194,7 @@ export default function Share() {
   const imagesListCard = (
     <Grid md={6} sm={12} style={{ width: "100%" }}>
       <Card>
-        <Card.Body css={{ minHeight: "80vh" }}>
+        <Card.Body css={{ minHeight: "50vh" }}>
           {shareLoading ? <Loading size="xl" css={{ height: "100%" }} /> : null}
 
           <Grid.Container gap={1}>
@@ -315,7 +344,7 @@ export default function Share() {
     <Modal
       closeButton
       {...bindingsPopupPreview}
-      width="80vh"
+      width="80vw"
       fullScreen={isMobile}
     >
       <Modal.Header>
@@ -324,14 +353,14 @@ export default function Share() {
       <Modal.Body
         css={{
           p: responsive?.xs ? "$0" : "$1",
-          height: isMobile ? "70vh" : null,
         }}
       >
         <Panzoom options={{ doubleClick: "toggleZoom", click: false }}>
           <div
             style={{
-              width: "100%",
+              width: !isMobile ? "80vw" : "100%",
               height: isMobile ? "70vh" : "100%",
+              maxHeight: !isMobile ? "80vh" : null,
             }}
           >
             <Image
@@ -437,90 +466,106 @@ export default function Share() {
     </Modal>
   ) : null;
 
-  const selectedImagesListCard =
-    selectedImagesList.length > 0 ? (
-      <Grid
-        css={
-          isMobile
-            ? {
-                position: "sticky",
-                alignSelf: "start",
-                top: "10px",
-                zIndex: 99,
-              }
-            : {
-                p: "$0",
-                marginTop: "$5",
-              }
-        }
-      >
-        <Card>
-          <Card.Header>
-            <Grid.Container justify="space-between">
-              <Grid>
-                <Text h3>
-                  已选图片列表（已选 {selectedImagesList.length} 张）
-                </Text>
-              </Grid>
-              <Grid>
-                <Grid.Container gap={0.5}>
-                  <Grid>
-                    <Button
-                      bordered
-                      auto
-                      size="sm"
-                      onPress={resetSelect}
-                      color="error"
-                    >
-                      清空
-                    </Button>
-                  </Grid>
-                  <Grid>
-                    <Button
-                      auto
-                      bordered
-                      color={copyBtnState[0]}
-                      icon={copyBtnState[1]}
-                      size="sm"
-                      onPress={handleCopySelection}
-                    >
-                      复制选择数据
-                    </Button>
-                  </Grid>
-                  <Grid>
-                    <Button
-                      auto
-                      color={submitBtnState[0]}
-                      icon={submitBtnState[1]}
-                      size="sm"
-                      onPress={handleSubmitSelection}
-                      {...(makeSelectionLoading
-                        ? {
-                            disabled: true,
-                            bordered: true,
-                            color: "secondary",
-                          }
-                        : {})}
-                    >
-                      {!makeSelectionLoading ? (
-                        "保存选择"
-                      ) : (
-                        <Loading color="currentColor" size="sm" />
-                      )}
-                    </Button>
-                  </Grid>
-                </Grid.Container>
-              </Grid>
-            </Grid.Container>
-          </Card.Header>
-          <Card.Body>
-            <Row css={{ maxH: !isMobile ? "25vh" : null, overflowY: "auto" }}>
-              {selectedImagesListEl}
-            </Row>
-          </Card.Body>
-        </Card>
-      </Grid>
-    ) : null;
+  const selectedImagesListCard = (
+    <Grid
+      css={
+        isMobile
+          ? {
+              position: "sticky",
+              alignSelf: "start",
+              top: "10px",
+              zIndex: 99,
+            }
+          : {
+              p: "$0",
+              marginTop: "$5",
+            }
+      }
+    >
+      <Card>
+        <Card.Header>
+          <Grid.Container justify="space-between">
+            <Grid>
+              <Text h3>
+                已选图片列表（已选 {selectedImagesList.length} 张）
+              </Text>
+            </Grid>
+            <Grid>
+              <Grid.Container gap={0.5}>
+                <Grid>
+                  <Button
+                    bordered
+                    auto
+                    size="sm"
+                    onPress={resetSelect}
+                    color="error"
+                  >
+                    清空
+                  </Button>
+                </Grid>
+                <Grid>
+                  <Button
+                    auto
+                    color="secondary"
+                    bordered
+                    size="sm"
+                    onPress={handlePressImportButton}
+                  >
+                    导入
+                  </Button>
+                </Grid>
+                <Grid>
+                  <Button
+                    auto
+                    bordered
+                    color={copyBtnState[0]}
+                    icon={copyBtnState[1]}
+                    size="sm"
+                    onPress={handleCopySelection}
+                  >
+                    复制选择数据
+                  </Button>
+                </Grid>
+                <Grid>
+                  <Button
+                    auto
+                    color={submitBtnState[0]}
+                    icon={submitBtnState[1]}
+                    size="sm"
+                    onPress={handleSubmitSelection}
+                    {...(makeSelectionLoading
+                      ? {
+                          disabled: true,
+                          bordered: true,
+                          color: "secondary",
+                        }
+                      : {})}
+                  >
+                    {!makeSelectionLoading ? (
+                      "保存选择"
+                    ) : (
+                      <Loading color="currentColor" size="sm" />
+                    )}
+                  </Button>
+                </Grid>
+              </Grid.Container>
+            </Grid>
+          </Grid.Container>
+        </Card.Header>
+        <Card.Body>
+          <Row css={{ maxH: !isMobile ? "25vh" : null, overflowY: "auto" }}>
+            {selectedImagesList.length > 0 ? (
+              selectedImagesListEl
+            ) : (
+              <Text css={{ w: "100%", p: "$5", textAlign: "center" }}>
+                尚未选择图片
+              </Text>
+            )}
+          </Row>
+        </Card.Body>
+      </Card>
+    </Grid>
+  );
 
   return (
     <Grid.Container gap={1}>
@@ -541,6 +586,44 @@ export default function Share() {
         </Grid.Container>
         {popupPreview}
       </Grid>
+      <Modal
+        closeButton
+        fullScreen={isMobile}
+        {...bindingsImportModal}
+        width={!isMobile ? "600px" : null}
+      >
+        <Modal.Header>
+          <Text h3>导入已选图片数据</Text>
+        </Modal.Header>
+        <Modal.Body>
+          <Textarea
+            width="100%"
+            rows={15}
+            value={dataToImport}
+            placeholder={`将需要导入的文件名填入此处，一行一个或以英文逗号隔开。
+导入内容将会与当前选择合并。`}
+            onChange={(evt) => setDataToImport(evt.target.value)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Grid.Container gap={0.5} justify="flex-end">
+            <Grid>
+              <Button
+                auto
+                bordered
+                onPress={() => setImportModalVisible(false)}
+              >
+                取消
+              </Button>
+            </Grid>
+            <Grid>
+              <Button auto onPress={handleImportSelectionData}>
+                导入
+              </Button>
+            </Grid>
+          </Grid.Container>
+        </Modal.Footer>
+      </Modal>
     </Grid.Container>
   );
 }

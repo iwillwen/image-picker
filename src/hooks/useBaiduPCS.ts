@@ -22,7 +22,6 @@ export type PcsImage = {
   fsId: number;
   path: string;
   thumb: string;
-  thumbs: Record<string, string>;
 };
 
 const DEFAULT_OPTIONS = {
