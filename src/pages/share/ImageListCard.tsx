@@ -33,7 +33,7 @@ function ImageListCard({
   return (
     <Card>
       <Card.Body>
-        {shareLoading || showImagesList.length <= 0 ? (
+        {shareLoading || (showImagesList ?? []).length <= 0 ? (
           <Loading size="xl" css={{ height: "100%" }} />
         ) : null}
 

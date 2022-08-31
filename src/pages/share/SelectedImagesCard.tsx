@@ -145,8 +145,8 @@ function SelectedImagesCard({
                 <Grid>
                   <Button
                     auto
-                    color={submitBtnState[0]}
-                    icon={submitBtnState[1]}
+                    color={submitBtnState?.[0] ?? "default"}
+                    icon={submitBtnState?.[1]}
                     size="sm"
                     onPress={handleSubmitSelection}
                     {...(makeSelectionLoading
