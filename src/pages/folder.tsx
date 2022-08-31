@@ -36,6 +36,7 @@ import { useLatest } from "ahooks";
 
 import { useBaiduPCS } from "../hooks/useBaiduPCS";
 import { useShare } from "../hooks/useShare";
+import Footer from "../components/Footer";
 
 export type PathRoute = {
   label: string;
@@ -161,9 +162,7 @@ export default function FolderList() {
           <Grid.Container>
             <Grid>{row.isFolder ? <Folder /> : <ImageIcon />}</Grid>
             <Grid xs={10}>
-              <Text margin="5px" css={{ lineHeight: 1 }}>
-                {row.name}
-              </Text>
+              <Text css={{ lineHeight: 1, margin: "5px" }}>{row.name}</Text>
             </Grid>
           </Grid.Container>
         );
@@ -408,6 +407,7 @@ export default function FolderList() {
         {table}
         {preview}
       </Row>
+      <Footer />
     </>
   );
 }
