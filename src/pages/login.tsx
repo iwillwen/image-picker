@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Modal, Button, Text } from "@nextui-org/react";
+import { Modal, Button, Text, Row, useModal } from "@nextui-org/react";
 import { Login } from "react-iconly";
 import { isString, isEmpty } from "lodash";
 import { useRouter } from "next/router";
@@ -10,6 +10,7 @@ import { useBaiduPCS } from "../hooks/useBaiduPCS";
 export default function LoginBaiduPCS() {
   const router = useRouter();
   const { getAuthUrl, setAccessToken } = useBaiduPCS();
+  const { setVisible, bindings } = useModal(true);
 
   const parseCallbackUrl = (url: string) => {
     const urlObj = new URL(url);
@@ -17,6 +18,7 @@ export default function LoginBaiduPCS() {
     const accessToken = parsedQuery["access_token"];
     if (isString(accessToken) && !isEmpty(accessToken)) {
       setAccessToken(accessToken);
+      setVisible(false);
       router.push("/folder");
     }
   };
@@ -33,7 +35,7 @@ export default function LoginBaiduPCS() {
   }, []);
 
   return (
-    <Modal preventClose aria-labelledby="login-baidu-pcs" open>
+    <Modal preventClose aria-labelledby="login-baidu-pcs" {...bindings}>
       <Modal.Header>
         <Text id="modal-title" size={18}>
           请先登陆百度网盘

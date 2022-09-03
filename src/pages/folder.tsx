@@ -30,9 +30,10 @@ import {
   Send,
   Paper,
   TickSquare,
+  CloseSquare,
 } from "react-iconly";
 import { useRouter } from "next/router";
-import { useLatest } from "ahooks";
+import { useLatest, useResponsive } from "ahooks";
 
 import { useBaiduPCS } from "../hooks/useBaiduPCS";
 import { useShare } from "../hooks/useShare";
@@ -99,6 +100,11 @@ export default function FolderList() {
         path: ["", ...paths.slice(1, index + 1)].join("/") || "/",
       }));
   }, [currentPath]);
+  const responsive = useResponsive();
+  const isMobile = useMemo(
+    () => responsive?.xs && !responsive?.md,
+    [responsive]
+  );
   const prevRoute = useMemo(
     () => (routes.length > 1 ? routes[routes.length - 2] : null),
     [routes]
@@ -237,7 +243,11 @@ export default function FolderList() {
 
   const toolbar = (
     <>
-      <Grid.Container gap={1} alignItems="center">
+      <Grid.Container
+        direction={isMobile ? "column" : "row"}
+        gap={1}
+        alignItems="center"
+      >
         <Grid>
           <Button
             auto
@@ -249,7 +259,7 @@ export default function FolderList() {
             返回上一层
           </Button>
         </Grid>
-        <Grid xs={8}>
+        <Grid css={{ flexGrow: 1 }}>
           <Grid.Container gap={0.1} alignItems="center">
             {routes.map((route, index) => [
               <Grid key={index}>
@@ -314,13 +324,17 @@ export default function FolderList() {
               </Popover>
             </Grid>
             <Grid>
-              <Switch
-                checked={shouldListImages}
-                onChange={handleToggleListImages}
-              />
-            </Grid>
-            <Grid>
-              <Text>加载当前目录中的图片列表</Text>
+              <Row gap={1} align="center" justify="flex-start">
+                <Col span={2}>
+                  <Switch
+                    checked={shouldListImages}
+                    onChange={handleToggleListImages}
+                  />
+                </Col>
+                <Col span={10}>
+                  <Text css={{ m: "$0" }}>加载当前目录中的图片列表</Text>
+                </Col>
+              </Row>
             </Grid>
           </Grid.Container>
         </Grid>
@@ -330,7 +344,7 @@ export default function FolderList() {
   );
 
   const table = (
-    <Col span={selectedImage ? 6 : 12}>
+    <Grid css={{ flexGrow: 1, zIndex: 1 }}>
       <Table
         selectionMode="single"
         style={{
@@ -375,38 +389,55 @@ export default function FolderList() {
           rowsPerPage={ROW_PER_PAGE}
         />
       </Table>
-    </Col>
+    </Grid>
   );
 
-  const preview = (
-    <Col span={selectedImage ? 6 : 0}>
-      {selectedImage && shouldListImages ? (
-        <Col>
-          <Card>
-            <Card.Header>
-              <Col>
-                <Text h4>{selectedImage.name}（预览缩略图）</Text>
-              </Col>
-            </Card.Header>
-            <Card.Image
-              src={selectedImage.thumb}
-              width="100%"
-              objectFit="contain"
-              height={600}
-            />
-          </Card>
-        </Col>
-      ) : null}
-    </Col>
-  );
+  const preview =
+    selectedImage && shouldListImages ? (
+      <Grid
+        css={{
+          "@xsMax": {
+            maxWidth: "100%",
+            position: "sticky",
+            alignSelf: "start",
+            top: "5px",
+            zIndex: 99,
+          },
+          "@sm": { flexGrow: 1, maxWidth: "50%" },
+        }}
+      >
+        <Card>
+          <Card.Header>
+            <Text h4 css={{ m: "$0" }}>
+              {selectedImage.name}（预览缩略图）
+            </Text>
+          </Card.Header>
+          <Card.Image
+            src={selectedImage.thumb}
+            width="100%"
+            objectFit="contain"
+            height={!isMobile ? 600 : null}
+          />
+        </Card>
+      </Grid>
+    ) : null;
 
   return (
     <>
       {toolbar}
-      <Row gap={1}>
-        {table}
-        {preview}
-      </Row>
+      <Grid.Container direction={isMobile ? "column" : "row"} gap={1}>
+        {isMobile ? (
+          <>
+            {preview}
+            {table}
+          </>
+        ) : (
+          <>
+            {table}
+            {preview}
+          </>
+        )}
+      </Grid.Container>
       <Footer />
     </>
   );

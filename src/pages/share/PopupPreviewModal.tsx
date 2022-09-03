@@ -67,15 +67,21 @@ function PopupPreview({
       </Modal.Header>
       <Modal.Body
         css={{
-          p: isMobile ? "$0" : "$1",
+          "@xsMax": { p: "$0" },
+          "@sm": { p: "$1" },
         }}
       >
         <Panzoom options={{ doubleClick: "toggleZoom", click: false }}>
-          <div
-            style={{
-              width: !isMobile ? "80vw" : "100%",
-              height: isMobile ? "70vh" : "100%",
-              maxHeight: !isMobile ? "80vh" : null,
+          <Row
+            css={{
+              "@xsMax": {
+                width: "100%",
+                height: "70vh",
+              },
+              "@sm": {
+                width: "80vw",
+                height: "80vh",
+              },
             }}
           >
             <Image
@@ -85,7 +91,7 @@ function PopupPreview({
               width="100%"
               height="100%"
             />
-          </div>
+          </Row>
         </Panzoom>
       </Modal.Body>
       <Modal.Footer>

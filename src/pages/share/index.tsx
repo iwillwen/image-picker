@@ -174,6 +174,9 @@ export default function Share() {
             setPopupPreviewVisible={setPopupPreviewVisible}
           />
         </Grid>
+        <Grid xs={24} sm={0}>
+          <Footer />
+        </Grid>
         <Grid
           xs={0}
           sm={6}
@@ -218,6 +221,9 @@ export default function Share() {
                   setPopupPreviewVisible={setPopupPreviewVisible}
                 />
               </Grid>
+              <Grid>
+                <Footer />
+              </Grid>
             </Grid.Container>
             <PopupPreview
               imagesList={imagesList}
@@ -240,7 +246,6 @@ export default function Share() {
           </>
         </Grid>
       </Grid.Container>
-      <Footer />
     </>
   );
 }
