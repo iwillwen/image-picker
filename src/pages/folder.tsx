@@ -30,7 +30,6 @@ import {
   Send,
   Paper,
   TickSquare,
-  CloseSquare,
 } from "react-iconly";
 import { useRouter } from "next/router";
 import { useLatest, useResponsive } from "ahooks";

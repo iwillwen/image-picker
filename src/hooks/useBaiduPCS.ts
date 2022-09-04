@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
-import { useRequest, useSessionStorageState } from "ahooks";
+import { useRequest, useSessionStorageState, useResponsive } from "ahooks";
 import queryString from "query-string";
 import { AUTH_URL, BAIDU_PCS_APPKEY } from "../constants";
 
@@ -37,6 +37,12 @@ export function useBaiduPCS(options: BaiduPcsOptions = {}) {
   const [accessToken, setAccessToken] =
     useSessionStorageState<string>(ACCESS_TOKEN_KEY);
   const isLogined = useMemo(() => accessToken?.length > 0, [accessToken]);
+  const responsive = useResponsive();
+  const isMobile = useMemo(
+    () => responsive?.xs && !responsive?.md,
+    [responsive]
+  );
+  const isPad = useMemo(() => responsive?.md && !responsive?.xl, [responsive]);
 
   useEffect(() => {
     if (options.ensureLogin && !isLogined) {
@@ -45,7 +51,11 @@ export function useBaiduPCS(options: BaiduPcsOptions = {}) {
   }, [options.ensureLogin, isLogined]);
 
   const getAuthUrl = (redirectUrl: string) => {
-    return `${AUTH_URL}?response_type=token&client_id=${options.appKey}&redirect_uri=${redirectUrl}&scope=basic,netdisk`;
+    return `${AUTH_URL}?response_type=token&client_id=${
+      options.appKey
+    }&redirect_uri=${redirectUrl}&scope=basic,netdisk&display=${
+      isPad ? "pad" : isMobile ? "mobile" : "page"
+    }`;
   };
 
   const {
