@@ -1,4 +1,10 @@
-import React, { ReactNode } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import {
   Modal,
   Row,
@@ -10,10 +16,15 @@ import {
   Loading,
   NormalColors,
 } from "@nextui-org/react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Zoom, Virtual, Mousewheel, Swiper as SwiperInstance } from "swiper";
 import { ChevronLeftCircle, ChevronRightCircle } from "react-iconly";
-import Panzoom from "../../components/panzoom";
 import { PcsImageWithSelection } from "./ImageListCard";
 import SelectedImagesList, { PcsImageWithIndex } from "./SelectedImagesList";
+
+import "swiper/css";
+import "swiper/css/virtual";
+import "swiper/css/zoom";
 
 export type PopupPreviewProps = {
   imagesList: PcsImageWithSelection[];
@@ -55,6 +66,46 @@ function PopupPreview({
   setPopupPreviewVisible,
   handleSubmitSelection,
 }: PopupPreviewProps) {
+  const swiperInstanceRef = useRef<SwiperInstance>();
+
+  const currentIndex = useMemo(
+    () =>
+      (imagesList ?? []).findIndex((row) => row.fsId === showingImage?.fsId),
+    [imagesList, showingImage]
+  );
+
+  const handleSlide = useCallback(
+    (activeIndex: number) => {
+      if (activeIndex < cursor && activeIndex && PAGE_SIZE === 0) {
+        goPrevPage();
+      }
+      if (activeIndex > cursor && activeIndex && PAGE_SIZE === 0) {
+        goNextPage();
+      }
+      setCursor(activeIndex);
+    },
+    [cursor]
+  );
+
+  const handleSwiperInit = (swiper: SwiperInstance) => {
+    swiperInstanceRef.current = swiper;
+    swiper.on("slideChange", () => handleSlide(swiper.activeIndex));
+  };
+
+  useEffect(() => {
+    if (
+      !imagesList ||
+      imagesList.length <= 0 ||
+      !showingImage ||
+      !swiperInstanceRef.current ||
+      swiperInstanceRef.current.destroyed
+    )
+      return;
+
+    const index = imagesList.findIndex((row) => row.fsId === showingImage.fsId);
+    swiperInstanceRef.current.slideTo(index);
+  }, [showingImage, imagesList]);
+
   return (
     <Modal
       closeButton
@@ -71,28 +122,39 @@ function PopupPreview({
           "@sm": { p: "$1" },
         }}
       >
-        <Panzoom options={{ doubleClick: "toggleZoom", click: false }}>
-          <Row
-            css={{
-              "@xsMax": {
-                width: "100%",
-                height: "70vh",
-              },
-              "@sm": {
-                width: "80vw",
-                height: "80vh",
-              },
-            }}
-          >
-            <Image
-              objectFit="contain"
-              src={showingImage?.thumb}
-              alt={showingImage?.filename}
-              width="100%"
-              height="100%"
-            />
-          </Row>
-        </Panzoom>
+        <Swiper
+          zoom={{
+            maxRatio: 2,
+          }}
+          mousewheel={{
+            forceToAxis: true,
+          }}
+          virtual
+          initialSlide={currentIndex}
+          modules={[Zoom, Virtual, Mousewheel]}
+          onSwiper={handleSwiperInit}
+        >
+          {(imagesList ?? []).map((image, i) => (
+            <SwiperSlide key={image.fsId} virtualIndex={i}>
+              <Image
+                className="swiper-zoom-container"
+                objectFit="contain"
+                src={image.thumb}
+                alt={image.filename}
+                css={{
+                  "@xsMax": {
+                    width: "100%",
+                    height: "70vh",
+                  },
+                  "@sm": {
+                    width: "80vw",
+                    height: "80vh",
+                  },
+                }}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </Modal.Body>
       <Modal.Footer>
         <Row>
