@@ -6,7 +6,7 @@ import Document, {
   Main,
   NextScript,
 } from "next/document";
-import { Container, Spacer, Text, Grid } from "@nextui-org/react";
+import { Container, Spacer, Grid, Button } from "@nextui-org/react";
 import { useResponsive } from "ahooks";
 import { CssBaseline } from "@nextui-org/react";
 import { Image2 } from "react-iconly";
@@ -29,16 +29,29 @@ function MyDocument() {
           <Spacer y={1} />
           <Grid.Container
             direction="row"
-            gap={1}
-            css={{ alignContent: "center" }}
+            css={{
+              "@xsMax": {
+                justifyContent: "center",
+              },
+              "@sm": {
+                justifyContent: "flex-start",
+              },
+            }}
           >
-            <Grid justify="center">
-              <Image2 set="bold" size="large" />
-            </Grid>
-            <Grid>
-              <Text h3 css={{ lineHeight: "32px", margin: "$0" }}>
+            <Grid xs={12} sm={2} css={{ justifyContent: "center" }}>
+              <Button
+                auto
+                bordered
+                shadow
+                color="gradient"
+                size="lg"
+                icon={<Image2 set="bold" size="large" />}
+                href="/"
+                target="_blank"
+                as="a"
+              >
                 选图小帮手（百度云盘版）
-              </Text>
+              </Button>
             </Grid>
           </Grid.Container>
           <Spacer y={1} />
