@@ -17,13 +17,7 @@ function MyDocument() {
 
   return (
     <Html lang="en">
-      <Head>
-        <link
-          ref="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/carousel.css"
-        />
-        {CssBaseline.flush()}
-      </Head>
+      <Head>{CssBaseline.flush()}</Head>
       <body>
         <Container css={{ paddingBottom: padding }}>
           <Spacer y={1} />
