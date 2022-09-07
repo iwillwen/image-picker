@@ -1,53 +1,45 @@
-## NodeJS存量应用迁移方案
-> 已有的NodeJS应用无需改造即可快速通过此方案部署到Serverless架构之上，享受实时弹性、按量付费的收益。
+# 快速选图小帮手
 
-## 如何迁移
-> 前提：应用文件总大小小于 100MB
+用于解决人像摄影师和模特快速从一堆底片中找出想要的图。基于 Next.js + NextUI 开发，目前直接调用了百度云的开放接口。
 
-- [Express应用迁移方案](https://help.aliyun.com/document_detail/180016.html#h1--nodejs-2)
-- [Egg应用迁移方案](https://help.aliyun.com/document_detail/180661.html#h1--nodejs-2)
-- [Koa应用迁移方案](https://help.aliyun.com/document_detail/180660.html#h1--nodejs-2)
-- [Next应用迁移方案](http://help.aliyun.com/document_detail/183599.html)
-- [Nuxt应用迁移方案](https://help.aliyun.com/document_detail/183673.html)
+## 部署
 
-## 迁移纯前端应用
-- 直接上传纯前端应用到 CloudIDE
-- 在 package.json 中，添加开发依赖
-```
-"mime":"*",
-"request":"*"
-```
-- 更新部署脚本，打开 .workbench 文件，编辑 CICD 命令
-```
-"cicd": {
-    "frontend-build": "mkdir zip && rsync -a --exclude node_modules/ --exclude package-lock.json --exclude zip/ . ./zip && cd zip && npm install --production",
-    "backend-build": "cd zip && npm run tsc",
-    "package": "cd zip && zip -r ../code.zip ./ -x '*.git*' -x '*.zip' -x '.DS_Store' && cd ../ && rm -rf zip"
-  }
+```bash
+$ yarn
+
+# Developing
+$ yarn dev
+
+# Build and Deployment
+$ yarn build
+$ yarn start
 ```
 
-  - frontend-build，前端应用构建脚本，工作目录为根目录，核心要求：根据应用的实际情况，将要部署到线上去的所有文件打包保存到根目录 zip 目录之下
-  - backend-build，后端应用构建脚本，工作目录为根目录，核心要求：根据应用的实际情况，将要部署到线上去的所有文件打包保存到根目录 zip 目录之下
-  - package，部署脚本，工作目录为根目录，核心要求：将根目录下的 zip 目录压缩成 code.zip（可选：删除构建的临时目录 zip）
+## 主要功能
 
-- 部署上线
+- 登录百度云授权
+- 获取文件夹列表
+- 获取文件夹内图片列表
+- 通过阿里云 OSS 创建选图链接和保存选图结果
 
-## 数据库示例
-- 如果你的应用需要操作数据库，可以参考本示例中的数据库示例
+## 环境变量
+
+启动项目需要在项目根目录中新建一个 `.env.local` 文件，并在其中配置以下环境变量信息。
+
 ```
-defalut.html      演示了通过 AJAX 方式读取 RDS 数据库数据
-/api/db_config.js 演示了如何连接 RDS 和 OTS 数据库
-/api/db_get.js    演示了如何读取 RDS 和 OTS 数据库
-package.json      演示了数据库操作需要安装的 npm 依赖
+NEXT_PUBLIC_BAIDU_PCS_APPKEY=<百度云应用 AppKey>
+NEXT_PUBLIC_OSS_APP_REGION=<阿里云 OSS 地区标识>
+NEXT_PUBLIC_OSS_APP_APPKEY_ID=<阿里云 OSS AppKey ID>
+NEXT_PUBLIC_OSS_APP_APPKEY_SECRET=<阿里云 OSS AppKey Secret>
+NEXT_PUBLIC_OSS_BUCKET=<阿里云 OSS 用于存储选图信息的 Bucket>
+THUMBNAIL_OSS_BUCKET=<阿里云 OSS 用于存储临时缩略图的 Bucket>
 ```
-- 要测试数据库效果，需要在「应用配置」中添加以下用于测试的环境变量，如果要开发自己的数据库应用，以下环境变量需要替换成自己的真实信息
-```
-OTS_ENDPOINT=https://todolist.cn-shanghai.ots.aliyuncs.com
-OTS_INSTANCE=todolist
-OTS_ACCESSKEY=LTAI4G1j3U8ue1yT3g6Tg1TG
-OTS_SECRET=WB8Ev6zMHoKQnUSLp8V4zP7xeAgbWC
-RDS_HOST=rm-uf6y14uhf0080yfrb7o.mysql.rds.aliyuncs.com
-RDS_DBNAME=faas-test
-RDS_USERNAME=faas_db_test
-RDS_PASSWORD=YY6i8Jp7W_mtYxU
-```
+
+## Roadmap
+
+- 增加其他存储方式的支持
+- 支持本地文件 P2P 提供选图
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)

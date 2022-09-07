@@ -27,6 +27,8 @@ function isDoneAllLoaded(listCount: number, limit: number) {
   return listCount < limit - 1;
 }
 
+const THUMBNAIL_DOMAIN = `${process.env.THUMBNAIL_OSS_BUCKET}.${process.env.NEXT_PUBLIC_OSS_APP_REGION}.aliyuncs.com`;
+
 export async function listImages(opts: ListImagesOptions): Promise<PcsImage[]> {
   const { access_token, parent_path, order, desc, only_jpg } = opts;
   const page = opts.page ?? 1;
@@ -62,10 +64,7 @@ export async function listImages(opts: ListImagesOptions): Promise<PcsImage[]> {
           path: row["path"],
           thumb: row["thumbs"]?.["url3"]
             .replace("c850_u580", "c1000_u1000")
-            .replace(
-              "thumbnail0.baidupcs.com",
-              "photo-picker-thumbnail.oss-cn-shanghai.aliyuncs.com"
-            ),
+            .replace("thumbnail0.baidupcs.com", THUMBNAIL_DOMAIN),
         } as PcsImage)
     ) ?? []
   ).filter((row: PcsImage) => {

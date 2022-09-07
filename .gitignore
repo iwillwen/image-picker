@@ -3,3 +3,4 @@ package-lock.json
 .nfs*
 .next
 .env.local
+.kaitian
