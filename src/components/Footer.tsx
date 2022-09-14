@@ -72,7 +72,7 @@ function Footer() {
           </Grid>
           <Grid>
             <Link href="https://beian.miit.gov.cn/" target="_blank">
-              粤ICP备17163462号
+              浙ICP备2022026794号
             </Link>
           </Grid>
         </Grid.Container>
