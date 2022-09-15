@@ -184,13 +184,24 @@ function SelectedImagesCard({
             <Link
               isExternal
               block={false}
-              href="https://pan.baidu.com/s/1wZVQFCQAtp1kP7GrX2UyEg?pwd=49ed"
+              href="https://pan.baidu.com/s/1BKkUXcFIYwEtwWwupq_H2g?pwd=sxf8"
               target="_blank"
             >
               点击此处
             </Link>
           </Text>
-          <Text css={{ m: "$0" }}>下载 Lightroom 快速标记插件</Text>
+          <Text css={{ m: "$0" }}>下载 Lightroom 快速标记插件，</Text>
+          <Text css={{ m: "$0" }}>
+            <Link
+              isExternal
+              block={false}
+              href="https://pan.baidu.com/s/1wGZ9BzyKtO7HxHW7ahnleQ?pwd=uu5u"
+              target="_blank"
+            >
+              点击此处
+            </Link>
+          </Text>
+          <Text css={{ m: "$0" }}>下载 Capture One 快速标记插件</Text>
         </Card.Footer>
       </Card>
       <Modal

@@ -63,7 +63,7 @@ export async function listImages(opts: ListImagesOptions): Promise<PcsImage[]> {
           fsId: row["fs_id"],
           path: row["path"],
           thumb: row["thumbs"]?.["url3"]
-            .replace("c850_u580", "c1000_u1000")
+            .replace("c850_u580", "c1500_u1500")
             .replace("thumbnail0.baidupcs.com", THUMBNAIL_DOMAIN),
         } as PcsImage)
     ) ?? []
