@@ -1,5 +1,5 @@
 const { createServer } = require('http')
-const { parse } = require('url')
+const { parse, format } = require('url')
 const next = require('next')
 
 const dev = process.env.NODE_ENV !== 'production'
@@ -15,6 +15,18 @@ app.prepare().then(() => {
       // Be sure to pass `true` as the second argument to `url.parse`.
       // This tells it to parse the query portion of the URL.
       const parsedUrl = parse(req.url, true)
+
+      if (parsedUrl.host === 'photo-picker.qingrizhi.com') {
+        const newUrl = format({
+          ...parsedUrl,
+          host: 'photo-picker.wwen.pro'
+        })
+        res.statsCode = 301
+        res.setHeader('Location', newUrl)
+        res.end('redirecting to new domain')
+        return
+      }
+
       await handle(req, res, parsedUrl)
     } catch (err) {
       console.error('Error occurred handling', req.url, err)

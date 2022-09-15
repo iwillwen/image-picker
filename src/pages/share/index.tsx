@@ -166,6 +166,7 @@ export default function Share() {
             showImagesList={showImagesList}
             activePage={activePage}
             totalPage={totalPage}
+            total={imagesList.length}
             PAGE_SIZE={PAGE_SIZE}
             isMobile={isMobile}
             setPage={setPage}

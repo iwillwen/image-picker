@@ -1,5 +1,13 @@
 import React from "react";
-import { Card, Grid, Row, Pagination, Image, Loading } from "@nextui-org/react";
+import {
+  Card,
+  Grid,
+  Row,
+  Pagination,
+  Image,
+  Loading,
+  Text,
+} from "@nextui-org/react";
 import { PcsImage } from "../../hooks/useBaiduPCS";
 
 export type PcsImageWithSelection = PcsImage & { isSelected?: boolean };
@@ -9,6 +17,7 @@ export type ImageListCardProps = {
   showImagesList: PcsImageWithSelection[];
   activePage: number;
   totalPage: number;
+  total: number;
   PAGE_SIZE: number;
   isMobile: boolean;
   setPage: (page: number) => void;
@@ -22,6 +31,7 @@ function ImageListCard({
   showImagesList,
   activePage,
   totalPage,
+  total,
   PAGE_SIZE,
   isMobile,
 
@@ -32,7 +42,12 @@ function ImageListCard({
 }: ImageListCardProps) {
   return (
     <Card>
-      <Card.Body>
+      <Card.Header css={{ justifyContent: "end" }}>
+        <Text size="$sm" css={{ m: "$0", marginRight: "$5" }}>
+          总共 {total} 张照片
+        </Text>
+      </Card.Header>
+      <Card.Body css={{ paddingTop: "$0" }}>
         {shareLoading || (showImagesList ?? []).length <= 0 ? (
           <Loading size="xl" css={{ height: "100%" }} />
         ) : null}
