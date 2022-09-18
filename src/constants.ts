@@ -3,6 +3,7 @@ export const AUTH_URL = "http://openapi.baidu.com/oauth/2.0/authorize";
 export const BAIDU_PCS_APPKEY = process.env.NEXT_PUBLIC_BAIDU_PCS_APPKEY;
 
 export const OSS_APP_REGION = process.env.NEXT_PUBLIC_OSS_APP_REGION;
+export const OSS_APP_REGION_INTERNAL = process.env.OSS_APP_REGION_INTERNAL;
 export const OSS_APP_APPKEY_ID = process.env.NEXT_PUBLIC_OSS_APP_APPKEY_ID;
 export const OSS_APP_APPKEY_SECRET =
   process.env.NEXT_PUBLIC_OSS_APP_APPKEY_SECRET;

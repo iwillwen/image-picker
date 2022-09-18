@@ -7,6 +7,7 @@ import {
   OSS_APP_APPKEY_ID,
   OSS_APP_APPKEY_SECRET,
   OSS_APP_REGION,
+  OSS_APP_REGION_INTERNAL,
   OSS_BUCKET,
 } from "../../constants";
 import { formatApiUrl } from "../../utils";
@@ -23,9 +24,12 @@ const OssOption: OSS.Options = {
 export function prefetchImages(images: PcsImage[]) {
   return Promise.all(
     images.map(async (image) => {
-      const res = await fetch(image.thumb, {
-        method: "GET",
-      });
+      const res = await fetch(
+        image.thumb.replace(OSS_APP_REGION, OSS_APP_REGION_INTERNAL),
+        {
+          method: "GET",
+        }
+      );
       return res.size;
     })
   );
