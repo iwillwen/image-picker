@@ -3,7 +3,11 @@ import type { NextApiHandler } from "next";
 import fetch from "node-fetch";
 import { extname } from "path";
 
-import { API_BASE } from "../../constants";
+import {
+  API_BASE,
+  OSS_APP_REGION,
+  THUMBNAIL_OSS_BUCKET,
+} from "../../constants";
 import { formatApiUrl } from "../../utils";
 
 export type PcsImage = {
@@ -27,7 +31,7 @@ function isDoneAllLoaded(listCount: number, limit: number) {
   return listCount < limit - 1;
 }
 
-const THUMBNAIL_DOMAIN = `${process.env.THUMBNAIL_OSS_BUCKET}.${process.env.NEXT_PUBLIC_OSS_APP_REGION}.aliyuncs.com`;
+const THUMBNAIL_DOMAIN = `${THUMBNAIL_OSS_BUCKET}.${OSS_APP_REGION}.aliyuncs.com`;
 
 export async function listImages(opts: ListImagesOptions): Promise<PcsImage[]> {
   const { access_token, parent_path, order, desc, only_jpg } = opts;

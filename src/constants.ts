@@ -8,3 +8,4 @@ export const OSS_APP_APPKEY_ID = process.env.NEXT_PUBLIC_OSS_APP_APPKEY_ID;
 export const OSS_APP_APPKEY_SECRET =
   process.env.NEXT_PUBLIC_OSS_APP_APPKEY_SECRET;
 export const OSS_BUCKET = process.env.NEXT_PUBLIC_OSS_BUCKET;
+export const THUMBNAIL_OSS_BUCKET = process.env.THUMBNAIL_OSS_BUCKET;
